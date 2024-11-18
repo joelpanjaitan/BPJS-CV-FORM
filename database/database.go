@@ -8,7 +8,7 @@ import (
 
 var DB*sql.DB
 
-func initDatabase(){
+func InitDatabase(){
 	var err error
 	DB, err = sql.Open("mysql","localhost:root@tcp(localhost:3306)/cv_app")
 	if err!= nil{
