@@ -14,6 +14,14 @@ type Profile struct {
 	Summary string `json:"summary"`
 }
 
+type Photo struct {
+	ID      int    `json:"id"`
+	Name    string `json:"name"`
+	Email   string `json:"email"`
+	Phone   string `json:"phone"`
+	Summary string `json:"summary"`
+}
+
 func GetProfile(w http.ResponseWriter, r *http.Request) {
 	rows, err := database.DB.Query("SELECT id, name, email, phone, summary FROM profile")
 	if err != nil {
@@ -107,4 +115,21 @@ func UpdatePhoto(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
+}
+
+func DeletePhoto(w http.ResponseWriter, r *http.Request) {
+	var profile Profile
+	if err := json.NewDecoder(r.Body).Decode(&profile); err != nil {
+		http.Error(w, "Invalid request payload", http.StatusBadRequest)
+		return
+	}
+
+	_, err := database.DB.Exec("DELETE from photo WHERE name = ?, email = ?, phone = ?, summary = ? WHERE id = ?",
+		profile.Name, profile.Email, profile.Phone, profile.Summary, profile.ID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
 }
