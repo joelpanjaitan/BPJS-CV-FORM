@@ -46,9 +46,6 @@ type Skill struct {
 	SkillName string `json:"skill_name"`
 }
 
-type PhotoData struct {
-	PhotoURL string `json:"photo_url"`
-}
 
 func GetProfile(w http.ResponseWriter, r *http.Request) {
 	rows, err := database.DB.Query("SELECT id, name, email, phone, photo_url, summary, created_at, updated_at FROM profile")
@@ -111,14 +108,36 @@ func UpdateProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err := database.DB.Exec("UPDATE profile SET name = ?, email = ?, phone = ?, summary = ? WHERE id = ?",
-		profile.Name, profile.Email, profile.Phone, profile.Summary, profile.ID)
+	if profile.ID == 0 {
+		http.Error(w, "Input ID is required", http.StatusBadRequest)
+		return
+	}
+
+	if profile.Name == ""||profile.Email == "" {
+		http.Error(w, "You must fill the name and email which are required", http.StatusBadRequest)
+		return 
+	}
+
+	result, err := database.DB.Exec("UPDATE profile SET name = ?, email = ?, phone = ?, photo_url = ?, summary = ?, updated_at = NOW() WHERE id = ?",
+		profile.Name, profile.Email, profile.Phone, profile.PhotoURL, profile.Summary, profile.ID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		http.Error(w, "Failed to retrieve rows affected", http.StatusInternalServerError)
+		return
+	}
+	if rowsAffected == 0 {
+		http.Error(w, "Profile not found or no changes made", http.StatusNotFound)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(profile)
 }
 
 func GetProfileDetail(w http.ResponseWriter, r *http.Request) {
@@ -138,53 +157,6 @@ func GetProfileDetail(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(profile)
-}
-
-func GetPhoto(w http.ResponseWriter, r *http.Request) {
-	profileID := mux.Vars(r)["profile_id"]
-	if profileID == "" {
-		http.Error(w, "Profile ID is required", http.StatusBadRequest)
-		return
-	}
-
-	var photoURL string
-	err := database.DB.QueryRow("SELECT photo_url FROM profile WHERE id = ?", profileID).Scan(&photoURL)
-	if err != nil {
-		http.Error(w, "Photo not found", http.StatusNotFound)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]string{"photo_url": photoURL})
-}
-
-func UpdatePhoto(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	profileID := vars["profile_id"]
-	var photoData PhotoData
-	if err := json.NewDecoder(r.Body).Decode(&photoData); err != nil {
-		http.Error(w, "Invalid payload", http.StatusBadRequest)
-		return
-	}
-
-	_, err := database.DB.Exec("UPDATE profile SET photo_url = ? WHERE id = ?", photoData.PhotoURL, profileID)
-	if err != nil {
-		http.Error(w, "Failed to update photo", http.StatusInternalServerError)
-		return
-	}
-
-	w.WriteHeader(http.StatusOK)
-}
-
-func DeletePhoto(w http.ResponseWriter, r *http.Request) {
-	profileID := mux.Vars(r)["profile_id"]
-	_, err := database.DB.Exec("UPDATE profile SET photo_url = NULL WHERE id = ?", profileID)
-	if err != nil {
-		http.Error(w, "Failed to delete photo", http.StatusInternalServerError)
-		return
-	}
-
-	w.WriteHeader(http.StatusNoContent)
 }
 
 func GetExperience(w http.ResponseWriter, r *http.Request) {
