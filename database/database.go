@@ -11,7 +11,7 @@ var DB*sql.DB
 
 func InitDatabase(){
 	var err error
-	DB, err = sql.Open("mysql","localhost:root@tcp(localhost:3306)/cv_app")
+	DB, err = sql.Open("mysql","root:password@tcp(localhost:3307)/api_db")
 	if err!= nil{
 		log.Fatal("Connection to database failed:", err)
 	}
