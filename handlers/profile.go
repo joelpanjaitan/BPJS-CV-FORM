@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"bpjs-cv-form/database"
+	"database/sql"
 	"encoding/json"
 	"net/http"
 	"strconv"
@@ -153,14 +154,19 @@ func GetProfileDetail(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, err := strconv.Atoi(vars["id"])
 	if err != nil {
-		http.Error(w, "Invalid profile ID", http.StatusBadRequest)
+		http.Error(w, "Input invalid for profile ID", http.StatusBadRequest)
 		return
 	}
 
-	row := database.DB.QueryRow("SELECT id, name, email, phone, summary FROM profile WHERE id = ?", id)
+	row := database.DB.QueryRow("SELECT id, name, email, phone, photo_url, summary FROM profile WHERE id = ?", id)
 	var profile Profile
-	if err := row.Scan(&profile.ID, &profile.Name, &profile.Email, &profile.Phone, &profile.Summary); err != nil {
-		http.Error(w, "Profile not found", http.StatusNotFound)
+	if err := row.Scan(&profile.ID, &profile.Name, &profile.Email, &profile.Phone, &profile.PhotoURL, &profile.Summary); err != nil {
+		if err == sql.ErrNoRows {
+			http.Error(w, "Detailed profile not found", http.StatusNotFound)
+		} else {
+			http.Error(w, "Can't fetching profile details", http.StatusInternalServerError)
+	
+		}
 		return
 	}
 
