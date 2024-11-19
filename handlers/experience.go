@@ -4,11 +4,8 @@ import (
 	"bpjs-cv-form/database"
 	"strconv"
 
-	// "database/sql"
 	"encoding/json"
 	"net/http"
-
-	// "strconv"
 
 	"github.com/gorilla/mux"
 )
