@@ -4,6 +4,9 @@ import (
 	"bpjs-cv-form/database"
 	"encoding/json"
 	"net/http"
+	"strconv"
+
+	"github.com/gorilla/mux"
 )
 
 type Profile struct {
@@ -76,6 +79,25 @@ func UpdateProfile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
+}
+
+func GetProfileByID(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		http.Error(w, "Invalid profile ID", http.StatusBadRequest)
+		return
+	}
+
+	row := database.DB.QueryRow("SELECT id, name, email, phone, summary FROM profile WHERE id = ?", id)
+	var profile Profile
+	if err := row.Scan(&profile.ID, &profile.Name, &profile.Email, &profile.Phone, &profile.Summary); err != nil {
+		http.Error(w, "Profile not found", http.StatusNotFound)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(profile)
 }
 
 func GetPhoto(w http.ResponseWriter, r *http.Request) {
