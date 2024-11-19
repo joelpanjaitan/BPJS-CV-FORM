@@ -158,6 +158,32 @@ func GetExperience(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer rows.Close()
+
+	var experiences []map[string]interface{}
+
+	for rows.Next() {
+		var exp struct {
+			ID        int    `json:"id"`
+			Company   string `json:"company"`
+			Position  string `json:"position"`
+			StartDate string `json:"start_date"`
+			EndDate   string `json:"end_date"`
+		}
+		if err := rows.Scan(&exp.ID, &exp.Company, &exp.Position, &exp.StartDate, &exp.EndDate); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		experiences = append(experiences, map[string]interface{}{
+			"id":         exp.ID,
+			"company":    exp.Company,
+			"position":   exp.Position,
+			"start_date": exp.StartDate,
+			"end_date":   exp.EndDate,
+		})
+	}
+
+	w.Header().Set("Content-Type","application/json")
+	json.NewEncoder(w).Encode(experiences)
 }
 
 func UpdateExperience(w http.ResponseWriter, r *http.Request) {
