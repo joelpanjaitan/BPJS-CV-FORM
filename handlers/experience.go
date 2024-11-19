@@ -2,6 +2,8 @@ package handlers
 
 import (
 	"bpjs-cv-form/database"
+	"strconv"
+
 	// "database/sql"
 	"encoding/json"
 	"net/http"
@@ -18,6 +20,7 @@ type Exp struct {
 	StartDate string `json:"start_date"`
 	EndDate   string `json:"end_date"`
 }
+
 func GetExperience(w http.ResponseWriter, r *http.Request) {
 	profileID := mux.Vars(r)["profile_id"]
 	rows, err := database.DB.Query("SELECT id, company, position, start_date, end_date FROM experience WHERE profile_id = ?", profileID)
@@ -45,24 +48,44 @@ func GetExperience(w http.ResponseWriter, r *http.Request) {
 		})
 	}
 
+	if len(experiences) == 0 {
+		http.Error(w, "Experiences not found for this profile", http.StatusNotFound)
+		return
+	}
+
 	w.Header().Set("Content-Type","application/json")
 	json.NewEncoder(w).Encode(experiences)
 }
 
 func UpdateExperience(w http.ResponseWriter, r *http.Request) {
 	var exp Exp
-	
+		vars := mux.Vars(r)
+	expID, err := strconv.Atoi(vars["experience_id"])
+	if err != nil {
+		http.Error(w, "Invalid experience ID", http.StatusBadRequest)
+		return
+	}
+
 	if err := json.NewDecoder(r.Body).Decode(&exp); err != nil {
 		http.Error(w, "Invalid payload", http.StatusBadRequest)
 		return
 	}
 
-	_, err := database.DB.Exec("UPDATE experience SET company = ?, position = ?, start_date = ?, end_date = ? WHERE id = ?",
-		exp.Company, exp.Position, exp.StartDate, exp.EndDate, exp.ID)
+	if exp.Company == "" || exp.Position == "" {
+		http.Error(w, "Company and Position are required fields", http.StatusBadRequest)
+		return
+	}
+	
+	_, err = database.DB.Exec("UPDATE experience SET company = ?, position = ?, start_date = ?, end_date = ? WHERE id = ?",
+		exp.Company, exp.Position, exp.StartDate, exp.EndDate, expID)
 	if err != nil {
 		http.Error(w, "Failed to update experience", http.StatusInternalServerError)
 		return
 	}
 
 	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{
+		"message": "Experience updated successfully",
+	})
 }
