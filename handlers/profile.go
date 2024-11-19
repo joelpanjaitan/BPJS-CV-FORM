@@ -38,6 +38,15 @@ type Record struct {
 	YearOfGraduation int    `json:"year_of_graduation"`
 }
 
+type Skill struct {
+	ID       int    `json:"id"`
+	SkillName string `json:"skill_name"`
+}
+
+type PhotoData struct {
+	PhotoURL string `json:"photo_url"`
+}
+
 func GetProfile(w http.ResponseWriter, r *http.Request) {
 	rows, err := database.DB.Query("SELECT id, name, email, phone, summary FROM profile")
 	if err != nil {
@@ -134,10 +143,7 @@ func GetPhoto(w http.ResponseWriter, r *http.Request) {
 func UpdatePhoto(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	profileID := vars["profile_id"]
-
-	var photoData struct {
-		PhotoURL string `json:"photo_url"`
-	}
+	var photoData PhotoData
 	if err := json.NewDecoder(r.Body).Decode(&photoData); err != nil {
 		http.Error(w, "Invalid payload", http.StatusBadRequest)
 		return
@@ -335,7 +341,34 @@ func DeleteEducation(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetSkills(w http.ResponseWriter, r *http.Request) {
+	var skill Skill
+	profileID := r.URL.Query().Get("profile_id")
+	if profileID == "" {
+		http.Error(w, "Profile ID is required", http.StatusBadRequest)
+		return
+	}
 
+	rows, err := database.DB.Query("SELECT id, skill_name FROM skill WHERE profile_id = ?", profileID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+
+	var skills []map[string]interface{}
+	for rows.Next() {
+		if err := rows.Scan(&skill.ID, &skill.SkillName); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		skills = append(skills, map[string]interface{}{
+			"id":         skill.ID,
+			"skill_name": skill.SkillName,
+		})
+	}
+
+	w.Header().Set("Content-Type","application/json")
+	json.NewEncoder(w).Encode(skills)
 }
 
 func CreateSkill(w http.ResponseWriter, r *http.Request) {
