@@ -103,15 +103,23 @@ func CreateProfile(w http.ResponseWriter, r *http.Request) {
 
 func UpdateProfile(w http.ResponseWriter, r *http.Request) {
 	var profile Profile
+	id := mux.Vars(r)["id"]
+	if id == "" {
+		http.Error(w, "Input ID is required", http.StatusBadRequest)
+		return
+	}
+
+	profileID, err := strconv.Atoi(id)
+	if err != nil {
+		http.Error(w, "Input invalid for profile ID", http.StatusBadRequest)
+		return
+	}
+
 	if err := json.NewDecoder(r.Body).Decode(&profile); err != nil {
 		http.Error(w, "Invalid request payload", http.StatusBadRequest)
 		return
 	}
 
-	if profile.ID == 0 {
-		http.Error(w, "Input ID is required", http.StatusBadRequest)
-		return
-	}
 
 	if profile.Name == ""||profile.Email == "" {
 		http.Error(w, "You must fill the name and email which are required", http.StatusBadRequest)
@@ -119,9 +127,9 @@ func UpdateProfile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	result, err := database.DB.Exec("UPDATE profile SET name = ?, email = ?, phone = ?, photo_url = ?, summary = ?, updated_at = NOW() WHERE id = ?",
-		profile.Name, profile.Email, profile.Phone, profile.PhotoURL, profile.Summary, profile.ID)
+		profile.Name, profile.Email, profile.Phone, profile.PhotoURL, profile.Summary, profileID)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, "Failed to update profile data: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -135,6 +143,7 @@ func UpdateProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	profile.ID = profileID
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(profile)
