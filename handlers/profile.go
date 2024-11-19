@@ -31,6 +31,13 @@ type Employment struct {
 	JobTitle  string `json:"job_title"`
 }
 
+type Record struct {
+	ID               int    `json:"id"`
+	SchoolName       string `json:"school_name"`
+	Degree           string `json:"degree"`
+	YearOfGraduation int    `json:"year_of_graduation"`
+}
+
 func GetProfile(w http.ResponseWriter, r *http.Request) {
 	rows, err := database.DB.Query("SELECT id, name, email, phone, summary FROM profile")
 	if err != nil {
@@ -266,11 +273,51 @@ func DeleteEmployment(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetEducation(w http.ResponseWriter, r *http.Request) {
+	var record Record
+	profileID := r.URL.Query().Get("profile_id")
+	if profileID == "" {
+		http.Error(w, "Profile ID is required", http.StatusBadRequest)
+		return
+	}
 
+	rows, err := database.DB.Query("SELECT id, school_name, degree, year_of_graduation FROM education WHERE profile_id = ?", profileID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+	
+	var educationRecords []map[string]interface{}
+
+	for rows.Next() {
+		if err := rows.Scan(&record.ID, &record.SchoolName, &record.Degree, &record.YearOfGraduation); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		educationRecords = append(educationRecords, map[string]interface{}{
+			"id":                  record.ID,
+			"school_name":         record.SchoolName,
+			"degree":              record.Degree,
+			"year_of_graduation":  record.YearOfGraduation,
+		})
+	}
+
+	w.Header().Set("Content-Type","application/json")
+	json.NewEncoder(w).Encode(educationRecords)
 }
 
 func CreateEducation(w http.ResponseWriter, r *http.Request) {
-
+	var record Record
+	if err := json.NewDecoder(r.Body).Decode(&record); err != nil {
+		http.Error(w, "Invalid request payload", http.StatusBadRequest)
+		return
+	}
+	_, err := database.DB.Exec("INSERT INTO education (profile_id, school_name, degree, year_of_graduation) VALUES (?, ?, ?, ?)",
+		record.ID, record.SchoolName, record.Degree, record.YearOfGraduation)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
 
 func DeleteEducation(w http.ResponseWriter, r *http.Request) {
