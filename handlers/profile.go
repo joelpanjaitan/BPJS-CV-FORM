@@ -372,7 +372,19 @@ func GetSkills(w http.ResponseWriter, r *http.Request) {
 }
 
 func CreateSkill(w http.ResponseWriter, r *http.Request) {
+	var skill Skill
+	if err := json.NewDecoder(r.Body).Decode(&skill); err != nil {
+		http.Error(w, "Invalid request payload", http.StatusBadRequest)
+		return
+	}
 
+	_, err := database.DB.Exec("INSERT INTO skill (profile_id, skill_name) VALUES (?, ?)", skill.ID, skill.SkillName)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
 }
 
 func DeleteSkill(w http.ResponseWriter, r *http.Request) {
