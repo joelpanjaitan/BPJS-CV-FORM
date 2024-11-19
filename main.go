@@ -14,7 +14,8 @@ func main() {
 	database.InitDatabase()
 
 	router := mux.NewRouter()
-	router.HandleFunc("/profile", handlers.GetProfile).Methods("GET")
+	router.HandleFunc("/api/profile", handlers.GetProfile).Methods("GET")
+	router.HandleFunc("/api/profile/{id}", handlers.GetProfileDetail).Methods("GET")
 	router.HandleFunc("/profile", handlers.CreateProfile).Methods("POST")
 	router.HandleFunc("/profile", handlers.UpdateProfile).Methods("PUT")
 
