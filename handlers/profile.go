@@ -17,12 +17,12 @@ type Profile struct {
 	Summary string `json:"summary"`
 }
 
-type Photo struct {
-	ID      int    `json:"id"`
-	Name    string `json:"name"`
-	Email   string `json:"email"`
-	Phone   string `json:"phone"`
-	Summary string `json:"summary"`
+type Exp struct {
+	ID        int    `json:"id"`
+	Company   string `json:"company"`
+	Position  string `json:"position"`
+	StartDate string `json:"start_date"`
+	EndDate   string `json:"end_date"`
 }
 
 func GetProfile(w http.ResponseWriter, r *http.Request) {
@@ -162,13 +162,8 @@ func GetExperience(w http.ResponseWriter, r *http.Request) {
 	var experiences []map[string]interface{}
 
 	for rows.Next() {
-		var exp struct {
-			ID        int    `json:"id"`
-			Company   string `json:"company"`
-			Position  string `json:"position"`
-			StartDate string `json:"start_date"`
-			EndDate   string `json:"end_date"`
-		}
+		var exp Exp
+		
 		if err := rows.Scan(&exp.ID, &exp.Company, &exp.Position, &exp.StartDate, &exp.EndDate); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -187,16 +182,17 @@ func GetExperience(w http.ResponseWriter, r *http.Request) {
 }
 
 func UpdateExperience(w http.ResponseWriter, r *http.Request) {
-	var profile Profile
-	if err := json.NewDecoder(r.Body).Decode(&profile); err != nil {
-		http.Error(w, "Invalid request payload", http.StatusBadRequest)
+	var exp Exp
+	
+	if err := json.NewDecoder(r.Body).Decode(&exp); err != nil {
+		http.Error(w, "Invalid payload", http.StatusBadRequest)
 		return
 	}
 
-	_, err := database.DB.Exec("UPDATE profile SET name = ?, email = ?, phone = ?, summary = ? WHERE id = ?",
-		profile.Name, profile.Email, profile.Phone, profile.Summary, profile.ID)
+	_, err := database.DB.Exec("UPDATE experience SET company = ?, position = ?, start_date = ?, end_date = ? WHERE id = ?",
+		exp.Company, exp.Position, exp.StartDate, exp.EndDate, exp.ID)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, "Failed to update experience", http.StatusInternalServerError)
 		return
 	}
 
