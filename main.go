@@ -23,8 +23,9 @@ func main() {
 	router.HandleFunc("/photo", handlers.UpdatePhoto).Methods("PUT")
 	router.HandleFunc("/photo", handlers.DeletePhoto).Methods("DELETE")
 
-	router.HandleFunc("/working-experience", handlers.GetExperience).Methods("GET")
-	router.HandleFunc("/working-experience", handlers.UpdateExperience).Methods("PUT")
+	router.HandleFunc("/api/working-experience", handlers.GetExperience).Methods("GET")
+	router.HandleFunc("/api/working-experience/{id}", handlers.GetExperience).Methods("GET")
+	router.HandleFunc("/api/working-experience", handlers.UpdateExperience).Methods("PUT")
 
 	router.HandleFunc("/employment", handlers.GetEmployment).Methods("GET")
 	router.HandleFunc("/employment", handlers.CreateEmployment).Methods("POST")
