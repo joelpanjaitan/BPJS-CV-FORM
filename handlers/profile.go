@@ -253,7 +253,16 @@ func CreateEmployment(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteEmployment(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id := vars["id"]
 
+	_, err := database.DB.Exec("DELETE FROM employment WHERE id = ?", id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
 }
 
 func GetEducation(w http.ResponseWriter, r *http.Request) {
