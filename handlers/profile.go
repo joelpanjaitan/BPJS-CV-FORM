@@ -158,9 +158,9 @@ func GetProfileDetail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	row := database.DB.QueryRow("SELECT id, name, email, phone, photo_url, summary FROM profile WHERE id = ?", id)
+	row := database.DB.QueryRow("SELECT id, name, email, phone, photo_url, summary, created_at, updated_at FROM profile WHERE id = ?", id)
 	var profile Profile
-	if err := row.Scan(&profile.ID, &profile.Name, &profile.Email, &profile.Phone, &profile.PhotoURL, &profile.Summary); err != nil {
+	if err := row.Scan(&profile.ID, &profile.Name, &profile.Email, &profile.Phone, &profile.PhotoURL, &profile.Summary, &profile.CreatedAt, &profile.UpdatedAt); err != nil {
 		if err == sql.ErrNoRows {
 			http.Error(w, "Detailed profile not found", http.StatusNotFound)
 		} else {
