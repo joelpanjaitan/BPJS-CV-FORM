@@ -27,15 +27,15 @@ func main() {
 
 	router.HandleFunc("/employment", handlers.GetEmployment).Methods("GET")
 	router.HandleFunc("/employment", handlers.CreateEmployment).Methods("POST")
-	router.HandleFunc("/employment", handlers.DeleteEmployment).Methods("DELETE")
+	router.HandleFunc("/employment/{id}", handlers.DeleteEmployment).Methods("DELETE")
 
 	router.HandleFunc("/education", handlers.GetEducation).Methods("GET")
 	router.HandleFunc("/education", handlers.CreateEducation).Methods("POST")
-	router.HandleFunc("/education", handlers.DeleteEducation).Methods("DELETE")
+	router.HandleFunc("/education/{id}", handlers.DeleteEducation).Methods("DELETE")
 
 	router.HandleFunc("/skill", handlers.GetSkills).Methods("GET")
 	router.HandleFunc("/skill", handlers.CreateSkill).Methods("POST")
-	router.HandleFunc("/skill", handlers.DeleteSkill).Methods("DELETE")
+	router.HandleFunc("/skill/{id}", handlers.DeleteSkill).Methods("DELETE")
 
 	log.Println("Server running on port 8080")
 	log.Fatal(http.ListenAndServe(":8080", router))
