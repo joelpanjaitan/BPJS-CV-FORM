@@ -53,7 +53,6 @@ type PhotoData struct {
 func GetProfile(w http.ResponseWriter, r *http.Request) {
 	rows, err := database.DB.Query("SELECT id, name, email, phone, photo_url, summary, created_at, updated_at FROM profile")
 	if err != nil {
-		
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -62,7 +61,7 @@ func GetProfile(w http.ResponseWriter, r *http.Request) {
 	var profiles []Profile
 	for rows.Next() {
 		var profile Profile
-		if err := rows.Scan(&profile.ID, &profile.Name, &profile.Email, &profile.Phone, &profile.Summary); err != nil {
+		if err := rows.Scan(&profile.ID, &profile.Name, &profile.Email, &profile.Phone, &profile.PhotoURL, &profile.Summary, &profile.CreatedAt, &profile.UpdatedAt); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
