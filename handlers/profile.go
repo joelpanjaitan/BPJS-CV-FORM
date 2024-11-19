@@ -388,5 +388,14 @@ func CreateSkill(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteSkill(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id := vars["id"]
 
+	_, err := database.DB.Exec("DELETE FROM skill WHERE id = ?", id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
 }
