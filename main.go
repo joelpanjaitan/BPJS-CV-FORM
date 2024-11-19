@@ -5,11 +5,13 @@ import (
 	"log"
 	"net/http"
 
+	"bpjs-cv-form/database"
+
 	"github.com/gorilla/mux"
 )
 
 func main() {
-	database.initDatabase()
+	database.InitDatabase()
 
 	router := mux.NewRouter()
 	router.HandleFunc("/profile", handlers.GetProfile).Methods("GET")

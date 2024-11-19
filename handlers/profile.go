@@ -198,3 +198,39 @@ func UpdateExperience(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 }
+
+func GetEmployment(w http.ResponseWriter, r *http.Request) {
+
+}
+
+func CreateEmployment(w http.ResponseWriter, r *http.Request) {
+
+}
+
+func DeleteEmployment(w http.ResponseWriter, r *http.Request) {
+
+}
+
+func GetEducation(w http.ResponseWriter, r *http.Request) {
+
+}
+
+func CreateEducation(w http.ResponseWriter, r *http.Request) {
+
+}
+
+func DeleteEducation(w http.ResponseWriter, r *http.Request) {
+
+}
+
+func GetSkills(w http.ResponseWriter, r *http.Request) {
+
+}
+
+func CreateSkill(w http.ResponseWriter, r *http.Request) {
+
+}
+
+func DeleteSkill(w http.ResponseWriter, r *http.Request) {
+
+}
