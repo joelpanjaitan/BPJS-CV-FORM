@@ -7,4 +7,6 @@ with methods for
 4. employment with methods get, create, delete
 5. education with methods get, post, delete
 6. skill with methods get, post, delete
-   ![alt text](image.png)
+
+Below is the screenshot for the application:
+![alt text](image.png)
