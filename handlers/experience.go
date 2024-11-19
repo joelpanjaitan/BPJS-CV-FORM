@@ -23,7 +23,7 @@ type Exp struct {
 
 func GetExperience(w http.ResponseWriter, r *http.Request) {
 	profileID := mux.Vars(r)["profile_id"]
-	rows, err := database.DB.Query("SELECT id, company, position, start_date, end_date FROM experience WHERE profile_id = ?", profileID)
+	rows, err := database.DB.Query("SELECT id, company_name, role, start_date, end_date FROM working_experience WHERE profile_id = ?", profileID)
 	if err != nil {
 		http.Error(w, "Error retrieving experiences", http.StatusInternalServerError)
 		return
