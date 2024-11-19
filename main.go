@@ -16,8 +16,8 @@ func main() {
 	router := mux.NewRouter()
 	router.HandleFunc("/api/profile", handlers.GetProfile).Methods("GET")
 	router.HandleFunc("/api/profile/{id}", handlers.GetProfileDetail).Methods("GET")
-	router.HandleFunc("/profile", handlers.CreateProfile).Methods("POST")
-	router.HandleFunc("/profile", handlers.UpdateProfile).Methods("PUT")
+	router.HandleFunc("/api/profile", handlers.CreateProfile).Methods("POST")
+	router.HandleFunc("/api/profile", handlers.UpdateProfile).Methods("PUT")
 
 	router.HandleFunc("/photo", handlers.GetPhoto).Methods("GET")
 	router.HandleFunc("/photo", handlers.UpdatePhoto).Methods("PUT")

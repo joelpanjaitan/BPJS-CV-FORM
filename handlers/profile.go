@@ -14,7 +14,10 @@ type Profile struct {
 	Name    string `json:"name"`
 	Email   string `json:"email"`
 	Phone   string `json:"phone"`
+	PhotoURL  string `json:"photo_url"`
 	Summary string `json:"summary"`
+	CreatedAt string `json:"created_at"`
+	UpdatedAt string `json:"updated_at"`
 }
 
 type Exp struct {
@@ -48,8 +51,9 @@ type PhotoData struct {
 }
 
 func GetProfile(w http.ResponseWriter, r *http.Request) {
-	rows, err := database.DB.Query("SELECT id, name, email, phone, summary FROM profile")
+	rows, err := database.DB.Query("SELECT id, name, email, phone, photo_url, summary, created_at, updated_at FROM profile")
 	if err != nil {
+		
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
