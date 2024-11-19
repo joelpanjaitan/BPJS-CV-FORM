@@ -84,14 +84,24 @@ func CreateProfile(w http.ResponseWriter, r *http.Request) {
 		return 
 	}
 
-	_, err := database.DB.Exec("INSERT INTO profile (name, email, phone, photo_url, summary) VALUES (?, ?, ?, ?)",
-		profile.Name, profile.Email, profile.Phone, profile.Summary)
+	result, err := database.DB.Exec("INSERT INTO profile (name, email, phone, photo_url, summary) VALUES (?, ?, ?, ?, ?)",
+		profile.Name, profile.Email, profile.Phone, profile.PhotoURL,profile.Summary)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
+	id, err := result.LastInsertId()
+	if err != nil {
+		http.Error(w, "Failed to retrieve last insert ID", http.StatusInternalServerError)
+		return
+	}
+
+	profile.ID = int(id)
+
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(profile)
 }
 
 func UpdateProfile(w http.ResponseWriter, r *http.Request) {
