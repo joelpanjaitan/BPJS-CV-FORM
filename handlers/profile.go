@@ -79,7 +79,12 @@ func CreateProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err := database.DB.Exec("INSERT INTO profile (name, email, phone, summary) VALUES (?, ?, ?, ?)",
+	if profile.Name == ""||profile.Email == "" {
+		http.Error(w, "You must fill the name and email which are required", http.StatusBadRequest)
+		return 
+	}
+
+	_, err := database.DB.Exec("INSERT INTO profile (name, email, phone, photo_url, summary) VALUES (?, ?, ?, ?)",
 		profile.Name, profile.Email, profile.Phone, profile.Summary)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
