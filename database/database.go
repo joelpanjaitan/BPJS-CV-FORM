@@ -19,5 +19,5 @@ func InitDatabase(){
 		log.Fatal("Timeout in database", err)
 	}
 
-	log.Println("Database Connection successful")
+	log.Println("Database is connected successfully")
 }
